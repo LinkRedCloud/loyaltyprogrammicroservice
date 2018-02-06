@@ -1,80 +1,238 @@
 FORMAT: 1A
-HOST: http://polls.apiblueprint.org/
+HOST: https://loyaltyprogrammicroservice.docs.apiary.io/#
 
-# loyaltyprogrammicroservice
+# Loyalty Program Microservice
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+The Loyalty Program API serves as the entry point to the Loyalty Program microservice, part of the "the Soaring through the Clouds - The Sequel" system.
 
-## Questions Collection [/questions]
+# Group Loyalty Points
+Loyalty points related resouces
 
-### List All Questions [GET]
+## Search, Create and Compensate points transactions [/api/v1/points{?customer_id,date_from,date_to,order_id,transaction_id}]
+Core actions for managing the Loyalty Program points account.
 
-+ Response 200 (application/json)
++ Parameters
+
+    + customer_id (string, optional)
+
+        Filter by Customer ID
+
+    + date_from (string, optional)
+
+        Filter by loyalty points transactions created greater or equal to date provided. Work as an AND filter with the other parameter "date_to"
+
+    + date_to (string, optional)
+
+        Filter by loyalty points transactions created before or equal to date provided.. Work as an AND filter with the other parameter "date_from"
+
+    + order_id (string, optional)
+
+        Filter loyalty points transactions associated to a specific Order id
+
+    + transaction_id (string, optional)
+
+        Tracing identifier for logging purposes. Corresponds to one specific Loyalty Point transaction in a customer's loyalty points account
+
+### Search Points Transactions [GET]
+
++ Request (text/plain)
+
+    + Headers
+
+            api-key: ac108161-d3a5-427d-b814-ff977728395b
+
++ Response 200 (application/json; charset=utf-8)
+
 
         [
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
-                    }
-                ]
+                "transaction_id": "8127394799736482",
+                "points_transaction_date": "2018-03-08T08:40:51.620Z",
+                "order_id": "81726846937",
+                "customer_id": "1099782",
+                "loyalty_points": 20
             }
         ]
 
-### Create a New Question [POST]
+### Create a New Points Transaction [POST]
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+Create a new loyalty point transaction for a given customer and associated with a given order.
 
 + Request (application/json)
 
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
+    + Headers
+
+            api-key: ac108161-d3a5-427d-b814-ff977728395b
+
+    + Body
+
+            {
+                "customer_id": "1099782",
+                "transaction_id": "8127394799736482",
+                "order_id": "81726846937",
+                "order_total_value": 132.53
+            }
+            
 
 + Response 201 (application/json)
 
     + Headers
 
-            Location: /questions/2
+            Location: /api/v1/points/{transaction_id}
 
     + Body
 
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
-                    {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
-                    }
-                ]
+                "transaction_id": "8127394799736482",
+                "points_transaction_date": "2018-03-08T08:40:51.620Z",
+                "order_id": "81726846937",
+                "customer_id": "1099782",
+                "loyalty_points": 14
             }
+
+### Compensate a Points Transaction [PUT]
+Whenever an order fails, it's necessary to compensate for the associated loyalty points, creating a copy of the transaction with a negative value. It will not delete any entry on the account transaction history.
+
++ Request (application/json)
+
+    + Headers
+
+            api-key: ac108161-d3a5-427d-b814-ff977728395b
+
+    + Body
+
+            {
+                "customer_id": "1099782",
+                "transaction_id": "8127394799736482",
+                "order_id": "81726846937"
+            }
+            
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /api/v1/points/{transaction_id}
+
+    + Body
+
+            {
+                "transaction_id": "8127394799736482",
+                "points_transaction_date": "2018-03-08T08:40:51.620Z",
+                "order_id": "81726846937",
+                "customer_id": "1099782",
+                "loyalty_points": 0
+            }
+
+## Private Actions [/api/v1/points/{transaction_id}]
+INTERNAL USE ONLY! These actions can be used to update or delete Loyalty Points account transaction entries.
+
+### Update Order [PUT]
+INTERNAL USE ONLY! Updates Loyalty Points account transaction details.
+
++ Request (application/json)
+
+    + Headers
+
+            api-key: ac108161-d3a5-427d-b814-ff977728395b
+
+    + Body
+
+             {
+                "points_transaction_date": "2018-03-08T08:40:51.620Z",
+                "order_id": "81726846937",
+                "customer_id": "1099782",
+                "loyalty_points": 4
+            }
+            
+
++ Response 200 (application/json)
+
+    + Headers
+
+            Location: /api/v1/points/{transaction_id}
+
+    + Body
+
+            {
+                "transaction_id": "8127394799736482",
+                "points_transaction_date": "2018-03-08T08:40:51.620Z",
+                "order_id": "81726846937",
+                "customer_id": "1099782",
+                "loyalty_points": 0
+            }
+
+### Delete Order [DELETE]
+INTERNAL USE ONLY! Deletes a Loyalty Points account transaction.
+
++ Request (application/json)
+
+    + Headers
+
+            api-key: ac108161-d3a5-427d-b814-ff977728395b
+            
+
++ Response 200 (application/json)
+
+# Group Loyalty Status
+Loyalty Status related resouces, including the overall Loyalty Program points balance. Customers can have three tiers of status: Silver, Gold and Platinum. A customer may or may not be enrolled in the loyalty program.
+
+## Search status [/api/v1/status{?customer_id,status_date}]
+Core actions for managing the Loyalty Program customer status .
+
++ Parameters
+
+    + customer_id (string, optional)
+
+        Filter by Customer ID. If not supplied, it will return all customers' loyalty points account balance and status: Silver, Gold, Platinum, Not Enrolled.
+
+    + status_date (string, optional)
+
+       Filter by loyalty program status on date. If parameter is not supplied, uses the current date/time.
+
+
+### Search Loyalty Program Status Transactions [GET]
+
++ Request (text/plain)
+
+    + Headers
+
+            api-key: ac108161-d3a5-427d-b814-ff977728395b
+
++ Response 200 (application/json; charset=utf-8)
+
+    + Attributes 
+    
+        + status (array[Status])
+
+### Recalculate Loyalty Status [POST]
+Triggers the loyalty status calculation.
+
++ Request (application/json)
+
+    + Headers
+
+            api-key: ac108161-d3a5-427d-b814-ff977728395b
+
+    + Body
+
+            {
+                "customer_id": "1099782"
+            }
+            
+
++ Response 200 (application/json)
+    
+    + Attributes (Response Metadata)
+
+# Data Structures
+
+## Response Metadata (object)
+- error (boolean, required)
+- message: `Outcome of transaction` (string, optional)
+
+## Status (object)
+- customer_id: `The Customer ID` (string, optional)
+- tier: `To which tier does the customer belong to` (string, optional)
+- total_loyalty_points: `The Loyalty Points account balance` (string, optional)
+- status_date: `Date to which this status pertains` (string, optional)
