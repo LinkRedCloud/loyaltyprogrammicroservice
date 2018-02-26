@@ -1,0 +1,174 @@
+{
+    "author": "José Carlos P. Rodrigues",
+    "data": [
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283094",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-01-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 7,
+            "customerId": "0019283094",
+            "orderId": "019928497324",
+            "orderNetValue": 239.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-01-09T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 1,
+            "customerId": "0019283094",
+            "orderId": "019928497325",
+            "orderNetValue": 5.29,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-01-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 40,
+            "customerId": "0019283096",
+            "orderId": "019928497323",
+            "orderNetValue": 1590.56,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-01-18T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 2,
+            "customerId": "0019283095",
+            "orderId": "019928497323",
+            "orderNetValue": 70.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-02-16T09:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283094",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492874",
+            "movementDate": "2018-02-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283098",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-02-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283098",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283094",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283097",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283097",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283096",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-08T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283095",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-01T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283093",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-02-22T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283093",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-12T12:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283092",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-12T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283095",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-10T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283093",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-01-19T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283091",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-02-19T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 9,
+            "customerId": "0019283094",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-06T08:40:51.620Z"
+        },
+        {
+            "loyaltyPoints": 4,
+            "customerId": "0019283091",
+            "orderId": "019928497323",
+            "orderNetValue": 142.35,
+            "transactionId": "917832326492873",
+            "movementDate": "2018-03-05T08:40:51.620Z"
+        }
+    ]
+    
+}
