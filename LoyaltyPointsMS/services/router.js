@@ -14,6 +14,10 @@ module.exports = function (controller) {
     router.route("/api/v1/balance")
         .get(controller.getPointsBalance);
 
+    router.route("/api/v1/status/:customer_id")
+        .get(controller.getCustomerStatus)
+        .post(controller.calculateStatusTier);
+
     return router;
 
 }

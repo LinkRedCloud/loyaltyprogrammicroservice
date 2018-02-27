@@ -63,6 +63,17 @@ module.exports = function (data) {
         };
     };
 
+    controller.getCustomerStatus = function (request, response) {
+        var customerId = request.params.customer_id;
+        var date = request.query.date;
+
+        data.getCustomerStatus(customerId, date, callbackFunction(response));
+    }
+
+    controller.calculateStatusTier = function (request, response) {
+
+    }
+
     return controller;
 
 }

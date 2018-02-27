@@ -16,7 +16,6 @@ function convertDateToStringDB (date) {
 
 getMovementPoints = function (customer_id, date_from, date_to, order_id, transaction_id, callback) {
     var summary = [];
-    var filtered = summary;
     //    Default date values
     var dateFrom = date_from ? new Date(date_from) : new Date("1970-01-01T00:00:00.000Z");
     var dateTo = date_to ? new Date(date_to) : new Date();
@@ -188,6 +187,52 @@ compensateLoyaltyPointsMovement = function (customer_id, order_id, callback) {
 };
 
 
+getCustomerStatus =  function (customerId, date, callback) {
+    var summary = [];
+    var dateFrom = date ? date : new Date();
+    dateFrom.setFullYear(dateFrom.getFullYear()-1);
+    var dateTo = date ? date : new Date();
+    const SQLQuery = "SELECT BALANCES.CUSTOMERID, BALANCES.BALANCE, CASE WHEN BALANCES.BALANCE >= 400 THEN 'PLATINUM' WHEN BALANCES.BALANCE >= 200 THEN 'GOLD' WHEN BALANCES.BALANCE >= 100 THEN 'SILVER' WHEN BALANCES.BALANCE >= 0 THEN 'STANDARD' END AS TIER FROM (SELECT CUSTOMERID, SUM(LOYALTYPOINTS) AS BALANCE FROM LOYALTYPOINTMOVEMENTS WHERE CUSTOMERID='" + customerId + "' AND MOVEMENTDATE >= "+ convertDateToStringDB(dateFrom) +" AND MOVEMENTDATE <= "+ convertDateToStringDB(dateTo) + " GROUP BY CUSTOMERID) BALANCES";
+
+
+    oracledb.getConnection(connProperties, function (err, connection) {
+        if (err) {
+            console.error(err.message);
+            return;
+        }
+        connection.execute(SQLQuery,
+            [],
+            { outFormat: oracledb.OBJECT },
+            function (err, result) {
+                if (err) {
+                    console.error(err.message);
+                    connection.release(function (err) {
+                        if (err) {
+                            console.error(err.message);
+                        }
+                    });
+                    callback();
+                    return;
+                }
+                result.rows.forEach(function (row) {
+                    summary.push({
+                        customerId: row.CUSTOMERID,
+                        balance: row.BALANCE,
+                        status: row.TIER
+                    });
+                });
+                connection.release(function (err) {
+                    if (err) {
+                        console.error(err.message);
+                    }
+                });
+                callback(summary);
+            });
+    });
+
+
+}
+
 ////EXPORTS
 module.exports.open = function (config) {
     var datasource = {};
@@ -243,6 +288,7 @@ module.exports.open = function (config) {
                 });
         });
     };
+    datasource.getCustomerStatus = getCustomerStatus;
 
     return datasource;
 
