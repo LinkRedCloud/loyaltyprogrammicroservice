@@ -5,7 +5,6 @@
     "command": "node main.js",
     "startupTime": 30,
     "shutdownTime": 0,
-    "mode": "rolling",
     "isClustered": "true",
     "release": {
         "build": "073",
