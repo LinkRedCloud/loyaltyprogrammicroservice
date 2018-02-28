@@ -1,0 +1,16 @@
+{
+    "runtime": {
+        "majorVersion": "8"
+    },
+    "command": "node main.js",
+    "startupTime": 30,
+    "shutdownTime": 0,
+    "mode": "rolling",
+    "isClustered": "true",
+    "release": {
+        "build": "073",
+        "commit": "asdasd",
+        "version": "1.0"
+    },
+    "notes": "Development version"
+}

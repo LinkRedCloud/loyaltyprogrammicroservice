@@ -16,7 +16,6 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.2",
-    "express": "^4.16.2",
-    "oracledb": "^2.1.2"
+    "express": "^4.16.2"
   }
 }
