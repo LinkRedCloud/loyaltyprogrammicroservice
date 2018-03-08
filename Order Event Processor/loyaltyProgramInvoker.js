@@ -1,0 +1,106 @@
+var request = require("request");
+
+var LOYALTY_MS_API_ENDPOINT = process.env.LOYALTY_MS_API_ENDPOINT || 'https://LoyaltyProgramMS-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com:443/api/v1/';
+
+var orderCreatedEventProcessor = module.exports;
+
+orderCreatedEventProcessor.handleOrderEventHubEvent = async function (message) {
+    console.log("Process Order Created:  Order Created Event payload " + JSON.stringify(message));
+    var event = {
+        "eventType": "OrderCreatedEvent",
+        "payload": {
+            "orderId": message.orderId,
+            "shoppingCartId": message.shoppingCartId,
+            "status": message.status,
+            "totalPrice": message.totalPrice,
+            "currency": message.currency,
+            "payment": !message.payment ? null : {
+                "cardType": message.payment.cardType,
+                "cardNumber": message.payment.cardNumber ? message.payment.cardNumber.string : null,
+                "startYear": message.payment.startYear ? message.payment.startYear.int : null,
+                "startMonth": message.payment.startMonth ? message.payment.startMonth.int : null,
+                "expiryYear": message.payment.expiryYear ? message.payment.expiryYear.int : null,
+                "expiryMonth": message.payment.expiryMonth ? message.payment.expiryMonth.int : null
+            },
+            "customer": !message.customer ? null : {
+                "customerId": message.customer.customerId ? message.customer.customerId.string : null,
+                "firstName": message.customer.firstName ? message.customer.firstName.string : null,
+                "lastName": message.customer.lastName ? message.customer.lastName.string : null,
+                "phone": message.customer.phone ? message.customer.phone.string : null,
+                "email": message.customer.email ? message.customer.email.string : null
+            }
+            , "addresses": (!message.addresses || !message.addresses.array) ? null
+                : message.addresses.array.reduce((orderAddresses, address) => {
+                    var orderAddress = { "type": address.name.string, "city": address.city.string, "country": address.country.string }
+                    orderAddresses.push(orderAddress); return orderAddresses
+                }
+                    , []),
+            "items": (!message.items || !message.items.array) ? null
+                : message.items.array.reduce((orderItems, item) => {
+                    var orderItem = {
+                        "productId": item.productId.string, "productCode": item.productCode.string
+                        , "productName": item.productName.string, "quantity": item.quantity.int
+                    }
+                    orderItems.push(orderItem); return orderItems
+                }
+                    , [])
+        }
+        ,
+        "module": "orders.microservice",
+        "transactionIdentifier": message.orderId,
+        "timestamp": message.updatedAt
+    }
+    console.log("Handle order, event =  " + JSON.stringify(event))
+    //TODO invoke Logistics API to create shipping for order
+    console.log("Compose and send request to Logistics MS API to create shipping")
+
+    //note:
+    // to resolved an issue with the certificate (unable to verify the first certificate)
+    // I added the  "rejectUnauthorized": false, based on this resource: https://stackoverflow.com/questions/31673587/error-unable-to-verify-the-first-certificate-in-nodejs
+    var options = {
+        method: 'POST',
+        "rejectUnauthorized": false,
+        url: LOYALTY_MS_API_ENDPOINT,
+        headers:
+            {
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json'
+            },
+        body:
+            {
+                order_id: event.payload.orderId,
+                customer_id: event.payload.customer.customerId,
+                transaction_id: event.transactionIdentifier,
+                order_net_value: event.payload.totalPrice,
+            },
+        json: true
+    };
+    console.log ("My Status=" + event.payload.status);
+    if (event.payload.status==="CANCELED") {
+        console.log("I'm going to compensate.....");
+        options.method = 'PUT';
+    };
+    request(options, function (error, response, body) {
+        try {
+            if (error) {
+                console.log("Failed to create shipping because of error " + error)
+
+            }
+
+            console.log("Created shipping - response from Logistics MS: " + body);
+            console.log("body: " + JSON.stringify(body));
+        } catch (e) {
+            console.log("Failed to handle call to create shipping because of error " + e)
+
+        }
+    });
+
+}
+
+
+
+    // var a = {
+    //     , "addresses": { "array": [{ "name": { "string": "BILLING" }, "line1": { "string": "22" }
+    //, "line2": { "string": "King street" }, "city": { "string": "Leamington Spa" }
+    //, "county": { "string": "Warkwickshire" }, "postcode": { "string": "CV31" }, "country": { "string": "GB" } }] }
+
