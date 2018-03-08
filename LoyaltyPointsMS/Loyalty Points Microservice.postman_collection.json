@@ -1,0 +1,114 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Loyalty Points Microservice",
+		"_postman_id": "99afbf9d-a4bb-1140-070e-b1e555c6e2de",
+		"description": "The Loyalty Points Microservice Postman Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/",
+			"request": {
+				"url": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n                \"customer_id\": \"1099782\",\n                \"transaction_id\": \"8127394799736482\",\n                \"order_id\": \"126\",\n                \"order_net_value\": 132.53\n            }"
+				},
+				"description": "Returns the list of all loyalty points movements"
+			},
+			"response": []
+		},
+		{
+			"name": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/",
+			"request": {
+				"url": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n                \"customer_id\": \"1099782\",\n                \"transaction_id\": \"8127394799736482\",\n                \"order_id\": \"131\",\n                \"order_net_value\": 132.53\n            }"
+				},
+				"description": "Inserts a new points movement on a customer's loyalty points account"
+			},
+			"response": []
+		},
+		{
+			"name": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/status/0019283094",
+			"request": {
+				"url": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/status/0019283094",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n                \"customer_id\": \"1099782\",\n                \"transaction_id\": \"8127394799736482\",\n                \"order_id\": \"126\",\n                \"order_net_value\": 132.53\n            }"
+				},
+				"description": "Checks the Status of a given customer"
+			},
+			"response": []
+		},
+		{
+			"name": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/?order_id=124",
+			"request": {
+				"url": {
+					"raw": "https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/?order_id=124",
+					"protocol": "https",
+					"host": [
+						"loyaltyprogramms-soaringcloudloyaltyms",
+						"eucom-north-1",
+						"oraclecloud",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						""
+					],
+					"query": [
+						{
+							"key": "order_id",
+							"value": "124",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n                \"customer_id\": \"1099782\",\n                \"transaction_id\": \"8127394799736482\",\n                \"order_id\": \"126\",\n                \"order_net_value\": 132.53\n            }"
+				},
+				"description": "Get the points movements for a given order_id"
+			},
+			"response": []
+		}
+	]
+}
