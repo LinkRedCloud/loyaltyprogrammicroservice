@@ -28,7 +28,7 @@ module.exports = function (data) {
         var dateTo = request.query.date_to;
         var orderId = request.query.order_id;
         var transactionId = request.query.transaction_id;
-
+        console.log("getting the movements from customer ID " + customerId);
         data.getMovementPoints(customerId, dateFrom, dateTo, orderId, transactionId, callbackFunction(response));
     };
 

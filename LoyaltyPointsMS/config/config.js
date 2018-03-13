@@ -9,7 +9,7 @@ module.exports = {
         port: process.env.PORT || 8888
     },
     db: {
-        connectString: process.env.DBAAS_DEFAULT_CONNECT_DESCRIPTOR || "192.168.59.84/orcl",
+        connectString: process.env.DBAAS_DEFAULT_CONNECT_DESCRIPTOR || "130.162.75.39/LoyaltyMS.596962618.oraclecloud.internal",
         user: process.env.DBAAS_USER_NAME || "loyaltyms_usr",
         password: process.env.DBAAS_USER_PASSWORD || "oracle"
     },

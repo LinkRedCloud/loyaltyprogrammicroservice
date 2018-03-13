@@ -24,20 +24,22 @@ getMovementPoints = function (customer_id, date_from, date_to, order_id, transac
     var queryFilter = "";
 
     if (customer_id) {
-        queryFilter=queryFilter + " AND CUSTOMERID=" + customer_id;
+        queryFilter=queryFilter + " AND CUSTOMERID='" + customer_id + "'";
     }    ;
     if (order_id) {
-        queryFilter=queryFilter + " AND ORDERID=" + order_id;
+        queryFilter=queryFilter + " AND ORDERID='" + order_id + "'";
     }    ;
     if ((date_from) || (date_to)) {
         queryFilter=queryFilter + " AND MOVEMENTDATE >= " + convertDateToStringDB(dateFrom) + " AND MOVEMENTDATE <= " + convertDateToStringDB(dateTo);
     }    ;
     if (transaction_id) {
-        queryFilter=queryFilter + " AND TRANSACTIONID=" + transaction_id;
+        queryFilter=queryFilter + " AND TRANSACTIONID='" + transaction_id + "'";
     }    ;
     if (queryFilter.length > 0) {
         queryFilter = "WHERE" + queryFilter.slice(4); 
     };
+
+    console.log ("Going to execute the following query" + "SELECT * FROM LOYALTYPOINTMOVEMENTS " + queryFilter);
 
     oracledb.getConnection(connProperties, function (err, connection) {
         if (err) {
