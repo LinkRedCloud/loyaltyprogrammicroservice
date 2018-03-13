@@ -20,29 +20,6 @@ define(
             //     });
 
 
-            self.lPointsMovements = ko.observableArray();
-            $.getJSON("https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/").then(function (movements) {
-                var tempArray = [];
-                $.each(movements, function () {
-                    tempArray.push({
-                        movementId: this.movementId,
-                        customerId: this.customerId,
-                        orderId: this.orderId,
-                        orderNetValue: this.orderNetValue,
-                        loyaltyPoints: this.loyaltyPoints,
-                        transactionId: this.transactionId,
-                        movementDate: new Date(this.movementDate)
-                    });
-                });
-                self.lPointsMovements(tempArray);
-            });
-
-            self.datasource = new oj.ArrayTableDataSource(
-                self.lPointsMovements,
-                { idAttribute: 'movementId' }
-            );
-
-
 
 
 
@@ -70,6 +47,29 @@ define(
                 }
             }
 
+            console.log("Getting customers from https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/customer/" + self.customerIdentifier());
+
+            self.lPointsMovements = ko.observableArray();
+            $.getJSON("https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/customer/" + self.customerIdentifier()).then(function (movements) {
+                var tempArray = [];
+                $.each(movements, function () {
+                    tempArray.push({
+                        movementId: this.movementId,
+                        customerId: this.customerId,
+                        orderId: this.orderId,
+                        orderNetValue: this.orderNetValue,
+                        loyaltyPoints: this.loyaltyPoints,
+                        transactionId: this.transactionId,
+                        movementDate: new Date(this.movementDate)
+                    });
+                });
+                self.lPointsMovements(tempArray);
+            });
+
+            self.datasource = new oj.ArrayTableDataSource(
+                self.lPointsMovements,
+                { idAttribute: 'movementId' }
+            );
 
 
             $.getJSON("https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/status/" + self.customerIdentifier())
