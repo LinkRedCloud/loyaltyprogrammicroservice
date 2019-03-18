@@ -44,17 +44,17 @@ import io.helidon.webserver.Service;
  * The message is returned as a JSON object
  */
 
-public class GreetService implements Service {
+public class CustomerService implements Service {
 
     /**
      * The config value for the key {@code greeting}.
      */
-    private String greeting;
+    private String customer;
 
     private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
 
-    GreetService(Config config) {
-        this.greeting = config.get("app.greeting").asString().orElse("Ciao");
+    CustomerService(Config config) {
+        this.customer = config.get("app.customer").asString().orElse("Customer - XX");
     }
 
     /**
@@ -65,8 +65,7 @@ public class GreetService implements Service {
     public void update(Routing.Rules rules) {
         rules
             .get("/", this::getDefaultMessageHandler)
-            .get("/{name}", this::getMessageHandler)
-            .put("/greeting", this::updateGreetingHandler);
+            .get("/{customerId}", this::getMessageHandler);
     }
 
     /**
@@ -76,7 +75,7 @@ public class GreetService implements Service {
      */
     private void getDefaultMessageHandler(ServerRequest request,
                                    ServerResponse response) {
-        sendResponse(response, "World");
+        sendResponse(response, "No Specified Customer ID");
     }
 
     /**
@@ -91,7 +90,7 @@ public class GreetService implements Service {
     }
 
     private void sendResponse(ServerResponse response, String name) {
-        String msg = String.format("%s %s!", greeting, name);
+        String msg = String.format("%s %s!", customer, name);
 
         JsonObject returnObject = JSON.createObjectBuilder()
                 .add("message", msg)
@@ -99,7 +98,7 @@ public class GreetService implements Service {
         response.send(returnObject);
     }
 
-    private void updateGreetingFromJson(JsonObject jo, ServerResponse response) {
+    /* private void updateGreetingFromJson(JsonObject jo, ServerResponse response) {
 
         if (!jo.containsKey("greeting")) {
             JsonObject jsonErrorObject = JSON.createObjectBuilder()
@@ -113,15 +112,17 @@ public class GreetService implements Service {
         greeting = jo.getString("greeting");
         response.status(Http.Status.NO_CONTENT_204).send();
     }
+    */
 
     /**
      * Set the greeting to use in future messages.
      * @param request the server request
      * @param response the server response
      */
-    private void updateGreetingHandler(ServerRequest request,
+    /*private void updateGreetingHandler(ServerRequest request,
                                        ServerResponse response) {
         request.content().as(JsonObject.class).thenAccept(jo -> updateGreetingFromJson(jo, response));
     }
+    */
 
 }

@@ -97,6 +97,10 @@ public final class Main {
 
         MetricsSupport metrics = MetricsSupport.create();
         GreetService greetService = new GreetService(config);
+        CustomerService customerService = new CustomerService(config);
+        BalanceService balanceService = new BalanceService(config);
+        StatusService statusService = new StatusService(config);
+        MovementService movementService = new MovementService(config);
         HealthSupport health = HealthSupport.builder()
                 .add(HealthChecks.healthChecks())   // Adds a convenient set of checks
                 .build();
@@ -105,11 +109,12 @@ public final class Main {
                 .register(JsonSupport.create())
                 .register(health)                   // Health at "/health"
                 .register(metrics)                  // Metrics at "/metrics"
-                .register("/", keepAlive)
-                .register("/api/v2/", greetService)
-                .register("/api/v2/customer", greetService)
-                .register("/api/v2/balance", greetService)
-                .register("/api/v2/status", greetService)
+                //.register("/", keepAlive)
+                .register("/greet", greetService)
+                .register("/api/v2", movementService)
+                .register("/api/v2/customer", customerService)
+                .register("/api/v2/balance", balanceService)
+                .register("/api/v2/status", statusService)
                 .build();
     }
 

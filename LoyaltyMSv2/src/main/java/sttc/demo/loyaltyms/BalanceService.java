@@ -44,7 +44,7 @@ import io.helidon.webserver.Service;
  * The message is returned as a JSON object
  */
 
-public class GreetService implements Service {
+public class BalanceService implements Service {
 
     /**
      * The config value for the key {@code greeting}.
@@ -53,7 +53,7 @@ public class GreetService implements Service {
 
     private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
 
-    GreetService(Config config) {
+    BalanceService(Config config) {
         this.greeting = config.get("app.greeting").asString().orElse("Ciao");
     }
 

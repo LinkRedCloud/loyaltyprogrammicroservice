@@ -16,6 +16,9 @@
 
 app:
   greeting: "Hello"
+  customer: "You requested customer information"
+  status: "Your Status"
+  balance: "Your Balance"
 
 server:
   port: 8080
