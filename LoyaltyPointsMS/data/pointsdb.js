@@ -238,6 +238,8 @@ getCustomerStatus =  function (customerId, date, callback) {
 ////EXPORTS
 module.exports.open = function (config) {
     var datasource = {};
+
+    console.log ("Vou ligar com os seguintes dados: " + config.db.connectString + " <-> " + config.db.user + " <-> " + config.db.password );
     connProperties = {
         user: config.db.user,
         password: config.db.password,

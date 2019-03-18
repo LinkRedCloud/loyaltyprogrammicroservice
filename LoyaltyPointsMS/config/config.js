@@ -9,9 +9,10 @@ module.exports = {
         port: process.env.PORT || 8888
     },
     db: {
-        connectString: process.env.DBAAS_DEFAULT_CONNECT_DESCRIPTOR || "130.162.75.39/LoyaltyMS.596962618.oraclecloud.internal",
+       // connectString: process.env.DBAAS_DEFAULT_CONNECT_DESCRIPTOR || "130.162.75.39/LoyaltyMS.596962618.oraclecloud.internal",
+        connectString: process.env.DBAAS_DEFAULT_CONNECT_DESCRIPTOR || "129.213.101.157/Loyalty_pdb1.workers1.okevcn.oraclevcn.com",
         user: process.env.DBAAS_USER_NAME || "loyaltyms_usr",
-        password: process.env.DBAAS_USER_PASSWORD || "oracle"
+        password: process.env.DBAAS_USER_PASSWORD || "OracLe_oow-18"//"oracle"
     },
     kafka: {
         zookeeperIp: process.env.KAFKA_ZOOKEEPER_IP || "129.150.77.116",
