@@ -16,11 +16,28 @@
 
 package sttc.demo.loyaltyms;
 
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoClient;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.Block;
+import com.mongodb.ConnectionString;
+import com.mongodb.ServerAddress;
+import com.mongodb.MongoCredential;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import static com.mongodb.client.model.Filters.*;
+import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.ValidationOptions;
+
+import org.bson.Document;
+
 import java.util.Collections;
 
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
+import javax.json.JsonArray;
 
 import io.helidon.common.http.Http;
 import io.helidon.config.Config;
@@ -32,17 +49,17 @@ import io.helidon.webserver.Service;
 /**
  * A simple service to greet you. Examples:
  *
- * Get default greeting message:
- * curl -X GET http://localhost:8080/greet
+ * Get default greeting message: curl -X GET http://localhost:8080/greet
  *
- * Get greeting message for Joe:
- * curl -X GET http://localhost:8080/greet/Joe
+ * Get greeting message for Joe: curl -X GET http://localhost:8080/greet/Joe
  *
- * Change greeting
- * curl -X PUT -H "Content-Type: application/json" -d '{"greeting" : "Howdy"}' http://localhost:8080/greet/greeting
+ * Change greeting curl -X PUT -H "Content-Type: application/json" -d
+ * '{"greeting" : "Howdy"}' http://localhost:8080/greet/greeting
  *
  * The message is returned as a JSON object
  */
+
+
 
 public class MovementService implements Service {
 
@@ -51,11 +68,63 @@ public class MovementService implements Service {
      */
     private String greeting;
 
+    private static final String DB_COLLECTION = "movements";
+    private static String dbURI = "mongodb+srv://sttcloyalty:oAJbxwmxK8K5YnFRW4G9@cluster0-kktxv.mongodb.net/sttcloyaltyms?retryWrites=true";
+    private static String dbName = "sttcloyaltyms";
+
     private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
+
+
+    private static JsonArray myResponse = Json.createArrayBuilder().build();
+    private static JsonObject myTest = Json.createObjectBuilder().build();
+
+    private static String myResult;
+
 
     MovementService(Config config) {
         this.greeting = config.get("app.greeting").asString().orElse("Ciao");
+//        this.dbURI = config.get("app.dbURI").asString().orElse("");
+//        this.dbName = config.get("app.dbName").asString().orElse("");
     }
+
+    //MongoClientURI uri = new MongoURI();
+
+//    MongoClient mongoClient = MongoClients.create("mongodb+srv://sttcloyalty:oAJbxwmxK8K5YnFRW4G9@cluster0-shard-00-01-kktxv.mongodb.net/sttcloyaltyms?retryWrites=true");
+//    MongoClient mongoClient = MongoClients.create(dbURI);
+    MongoClient mongoClient = MongoClients.create(dbURI);
+    MongoDatabase database = mongoClient.getDatabase(dbName);
+
+    MongoCollection<Document> collection = database.getCollection(DB_COLLECTION);
+
+    
+    Block<Document> buildResponse = new Block<Document>() {
+        @Override
+        public void apply(final Document document) {
+            
+            myResult = myResult + document.toJson() + ",";
+            
+            System.out.println(document.toJson());
+
+            // JsonObject myJSON= Json.createObjectBuilder().add("movements", document.toJson()).build();
+            // myTest.put("movements",document);
+            // System.out.println(document.toJson());
+            // System.out.println(myJSON);
+            // System.out.println(myResponse.size());
+            // System.out.println(myTest);
+
+            // myResponse.put(myJSON);
+            // System.out.println(document.toJson());
+
+            //myResponse = JSON.createObjectBuilder()
+            //    .add("movements", document.toJson())
+            //    .build();
+
+            //myResponse.add("movements", document.toJson());
+
+
+        }
+    };
+      
 
     /**
      * A service registers itself by updating the routine rules.
@@ -64,7 +133,7 @@ public class MovementService implements Service {
     @Override
     public void update(Routing.Rules rules) {
         rules
-            .get("/", this::getDefaultMessageHandler)
+            .get("/", this::getMovementPoints)
             .get("/{name}", this::getMessageHandler)
             .put("/greeting", this::updateGreetingHandler);
     }
@@ -74,9 +143,17 @@ public class MovementService implements Service {
      * @param request the server request
      * @param response the server response
      */
-    private void getDefaultMessageHandler(ServerRequest request,
+    private void getMovementPoints(ServerRequest request,
                                    ServerResponse response) {
-        sendResponse(response, "World");
+        
+        myResult = "{\"movements\" : [";
+        //private static JsonObject myResponse = JSON.createObjectBuilder().add("movements", collection.find()).build();                              
+        collection.find().forEach(buildResponse);
+        myResult = myResult.substring(0, myResult.length() - 1);
+        myResult = myResult + "]}";
+        //myResponse.build();
+        response.send(myResult);
+        // sendResponse(response, myResult);
     }
 
     /**

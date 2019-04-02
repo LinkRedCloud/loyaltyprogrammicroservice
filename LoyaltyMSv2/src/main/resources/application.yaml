@@ -19,6 +19,8 @@ app:
   customer: "You requested customer information"
   status: "Your Status"
   balance: "Your Balance"
+  dbURI: "mongodb+srv://sttcloyalty:oAJbxwmxK8K5YnFRW4G9@cluster0-kktxv.mongodb.net/sttcloyaltyms?retryWrites=true"
+  dbName: "sttcloyaltyms"
 
 server:
   port: 8080
