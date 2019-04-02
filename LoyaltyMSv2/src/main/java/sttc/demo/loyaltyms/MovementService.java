@@ -17,27 +17,26 @@
 package sttc.demo.loyaltyms;
 
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoClient;
-import com.mongodb.MongoClientSettings;
+import com.mongodb.BasicDBObject;
 import com.mongodb.Block;
-import com.mongodb.ConnectionString;
-import com.mongodb.ServerAddress;
-import com.mongodb.MongoCredential;
-import com.mongodb.MongoClientOptions;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Filters;
+import com.mongodb.util.JSON;
+
 import static com.mongodb.client.model.Filters.*;
-import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.ValidationOptions;
 
 import org.bson.Document;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 
-import javax.json.Json;
-import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
-import javax.json.JsonArray;
 
 import io.helidon.common.http.Http;
 import io.helidon.config.Config;
@@ -59,26 +58,21 @@ import io.helidon.webserver.Service;
  * The message is returned as a JSON object
  */
 
-
-
 public class MovementService implements Service {
 
     /**
      * The config value for the key {@code greeting}.
      */
-    private String greeting;
 
     private static final String DB_COLLECTION = "movements";
     private static String dbURI = "mongodb+srv://sttcloyalty:oAJbxwmxK8K5YnFRW4G9@cluster0-kktxv.mongodb.net/sttcloyaltyms?retryWrites=true";
     private static String dbName = "sttcloyaltyms";
 
-    private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
-
     private static String myResult;
 
 
     MovementService(Config config) {
-        this.greeting = config.get("app.greeting").asString().orElse("Ciao");
+        // this.greeting = config.get("app.greeting").asString().orElse("Ciao");
     }
 
 
@@ -105,9 +99,11 @@ public class MovementService implements Service {
     @Override
     public void update(Routing.Rules rules) {
         rules
-            .get("/", this::getMovementPoints)
-            .get("/{name}", this::getMessageHandler)
-            .put("/greeting", this::updateGreetingHandler);
+            .get("/", this::getAllMovements)
+            .get("/balance/{customer}", this::getCustomerBalance)
+            .get("/{customer}", this::getCustomerMovements)
+            .post("/create", this::createMovement)
+            .post("/compensate", this::compensateMovement);
     }
 
     /**
@@ -115,10 +111,12 @@ public class MovementService implements Service {
      * @param request the server request
      * @param response the server response
      */
-    private void getMovementPoints(ServerRequest request,
+    private void getAllMovements(ServerRequest request,
                                    ServerResponse response) {
         
+        
         myResult = "{\"movements\" : [";
+        
         collection.find().forEach(buildJSONAllDocuments);
         myResult = myResult.substring(0, myResult.length() - 1);
         myResult = myResult + "]}";
@@ -130,34 +128,29 @@ public class MovementService implements Service {
      * @param request the server request
      * @param response the server response
      */
-    private void getMessageHandler(ServerRequest request,
+
+     private void getCustomerMovements(ServerRequest request,
                             ServerResponse response) {
-        String name = request.path().param("name");
-        sendResponse(response, name);
+        String customer = request.path().param("customer");
+        myResult = "{\"movements\" : [";
+        collection.find(eq("customerId", customer)).forEach(buildJSONAllDocuments);
+        myResult = myResult.substring(0, myResult.length() - 1);
+        myResult = myResult + "]}";
+        response.send(myResult);
     }
 
-    private void sendResponse(ServerResponse response, String name) {
-        String msg = String.format("%s %s!", greeting, name);
+    private void createMovementInMongoDB(JsonObject jo, ServerResponse response) {
 
-        JsonObject returnObject = JSON.createObjectBuilder()
-                .add("message", msg)
-                .build();
-        response.send(returnObject);
-    }
+        Document document = new Document("customerId", jo.getString("customerId"))
+               .append("orderId", jo.getString("orderId"))
+               .append("orderNetValue", jo.getJsonNumber("orderNetValue").doubleValue())
+               .append("loyaltyPoints", (int)Math.ceil(jo.getJsonNumber("orderNetValue").doubleValue()/4))
+               .append("transactionId", jo.getString("transactionId"))
+               .append("movementDate", new Date());
 
-    private void updateGreetingFromJson(JsonObject jo, ServerResponse response) {
+                collection.insertOne(document);
 
-        if (!jo.containsKey("greeting")) {
-            JsonObject jsonErrorObject = JSON.createObjectBuilder()
-                    .add("error", "No greeting provided")
-                    .build();
-            response.status(Http.Status.BAD_REQUEST_400)
-                    .send(jsonErrorObject);
-            return;
-        }
-
-        greeting = jo.getString("greeting");
-        response.status(Http.Status.NO_CONTENT_204).send();
+        response.status(Http.Status.CREATED_201).send(jo.toString());
     }
 
     /**
@@ -165,9 +158,77 @@ public class MovementService implements Service {
      * @param request the server request
      * @param response the server response
      */
-    private void updateGreetingHandler(ServerRequest request,
+    private void createMovement(ServerRequest request,
                                        ServerResponse response) {
-        request.content().as(JsonObject.class).thenAccept(jo -> updateGreetingFromJson(jo, response));
+        request.content().as(JsonObject.class).thenAccept(jo -> createMovementInMongoDB(jo, response));
     }
 
+
+
+    private void compensateMovementInMongoDB(JsonObject jo, ServerResponse response) {
+
+        String orderToCompensate = jo.getString("orderId");
+
+        Document orderDocument = collection.find(eq("orderId", orderToCompensate)).first();
+
+
+        Document document = new Document("customerId", orderDocument.getString("customerId"))
+               .append("orderId", orderDocument.getString("orderId"))
+               .append("orderNetValue", 0)
+               .append("loyaltyPoints", orderDocument.getInteger("loyaltyPoints")*-1)
+               .append("transactionId", orderDocument.getString("transactionId"))
+               .append("movementDate", new Date());
+
+                collection.insertOne(document);
+
+        response.status(Http.Status.CREATED_201).send(jo.toString());
+    }
+
+    /**
+     * Set the greeting to use in future messages.
+     * @param request the server request
+     * @param response the server response
+     */
+    private void compensateMovement(ServerRequest request,
+                                       ServerResponse response) {
+        request.content().as(JsonObject.class).thenAccept(jo -> compensateMovementInMongoDB(jo, response));
+    }
+    
+    Block<Document> printBlock = new Block<Document>() {
+        @Override
+        public void apply(final Document document) {
+            System.out.println(document.toJson());
+        }
+    };
+
+
+    public static boolean isBetween(int x, int lower, int upper) {
+        return lower <= x && x <= upper;
+      }
+
+    private void getCustomerBalance(ServerRequest request, ServerResponse response) {
+        String customer = request.path().param("customer");
+        Integer currentBalance;
+        String currentStatus;
+        AggregateIterable<Document> balanceDoc = collection.aggregate(
+            Arrays.asList(
+                Aggregates.match(Filters.eq("customerId", customer)),
+                Aggregates.group("$customerId", Accumulators.sum("balance", "$loyaltyPoints" ))
+
+        ));
+        currentBalance = (balanceDoc.first().getInteger("balance"));
+        if(isBetween(currentBalance, 0, 99)) {
+            currentStatus="Standard";
+          } else if (isBetween(currentBalance, 100, 199)) {
+            currentStatus="Silver";
+          } else if (isBetween(currentBalance, 200, 399)) {
+            currentStatus="Gold";
+          } else {
+            currentStatus="Platinum";
+          };
+
+        BasicDBObject result = new BasicDBObject(balanceDoc.first()).append("status", currentStatus);
+
+        response.status(Http.Status.OK_200).send(result.toJson());
+    }
 }

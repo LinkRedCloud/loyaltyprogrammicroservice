@@ -97,9 +97,9 @@ public final class Main {
 
         MetricsSupport metrics = MetricsSupport.create();
         GreetService greetService = new GreetService(config);
-        CustomerService customerService = new CustomerService(config);
-        BalanceService balanceService = new BalanceService(config);
-        StatusService statusService = new StatusService(config);
+        // CustomerService customerService = new CustomerService(config);
+        // BalanceService balanceService = new BalanceService(config);
+        // StatusService statusService = new StatusService(config);
         MovementService movementService = new MovementService(config);
         HealthSupport health = HealthSupport.builder()
                 .add(HealthChecks.healthChecks())   // Adds a convenient set of checks
@@ -112,9 +112,9 @@ public final class Main {
                 //.register("/", keepAlive)
                 .register("/greet", greetService)
                 .register("/api/v2", movementService)
-                .register("/api/v2/customer", customerService)
-                .register("/api/v2/balance", balanceService)
-                .register("/api/v2/status", statusService)
+                // .register("/api/v2/customer", customerService)
+                // .register("/api/v2/balance", balanceService)
+                // .register("/api/v2/status", statusService)
                 .build();
     }
 
