@@ -74,54 +74,26 @@ public class MovementService implements Service {
 
     private static final JsonBuilderFactory JSON = Json.createBuilderFactory(Collections.emptyMap());
 
-
-    private static JsonArray myResponse = Json.createArrayBuilder().build();
-    private static JsonObject myTest = Json.createObjectBuilder().build();
-
     private static String myResult;
 
 
     MovementService(Config config) {
         this.greeting = config.get("app.greeting").asString().orElse("Ciao");
-//        this.dbURI = config.get("app.dbURI").asString().orElse("");
-//        this.dbName = config.get("app.dbName").asString().orElse("");
     }
 
-    //MongoClientURI uri = new MongoURI();
 
-//    MongoClient mongoClient = MongoClients.create("mongodb+srv://sttcloyalty:oAJbxwmxK8K5YnFRW4G9@cluster0-shard-00-01-kktxv.mongodb.net/sttcloyaltyms?retryWrites=true");
-//    MongoClient mongoClient = MongoClients.create(dbURI);
     MongoClient mongoClient = MongoClients.create(dbURI);
     MongoDatabase database = mongoClient.getDatabase(dbName);
 
     MongoCollection<Document> collection = database.getCollection(DB_COLLECTION);
 
     
-    Block<Document> buildResponse = new Block<Document>() {
+    Block<Document> buildJSONAllDocuments = new Block<Document>() {
         @Override
         public void apply(final Document document) {
             
             myResult = myResult + document.toJson() + ",";
             
-            System.out.println(document.toJson());
-
-            // JsonObject myJSON= Json.createObjectBuilder().add("movements", document.toJson()).build();
-            // myTest.put("movements",document);
-            // System.out.println(document.toJson());
-            // System.out.println(myJSON);
-            // System.out.println(myResponse.size());
-            // System.out.println(myTest);
-
-            // myResponse.put(myJSON);
-            // System.out.println(document.toJson());
-
-            //myResponse = JSON.createObjectBuilder()
-            //    .add("movements", document.toJson())
-            //    .build();
-
-            //myResponse.add("movements", document.toJson());
-
-
         }
     };
       
@@ -147,13 +119,10 @@ public class MovementService implements Service {
                                    ServerResponse response) {
         
         myResult = "{\"movements\" : [";
-        //private static JsonObject myResponse = JSON.createObjectBuilder().add("movements", collection.find()).build();                              
-        collection.find().forEach(buildResponse);
+        collection.find().forEach(buildJSONAllDocuments);
         myResult = myResult.substring(0, myResult.length() - 1);
         myResult = myResult + "]}";
-        //myResponse.build();
         response.send(myResult);
-        // sendResponse(response, myResult);
     }
 
     /**
