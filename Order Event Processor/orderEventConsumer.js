@@ -3,15 +3,15 @@ var fmt = require('bunyan-format');
 var kafkaLog = KafkaAvro.getLogger();
 
 console.log("Order Events Consumer - Starting...")
-var EVENT_HUB_PUBLIC_IP = process.env.EVENT_HUB_HOST || '129.150.77.116';
-var SCHEMA_REGISTRY = process.env.SCHEMA_REGISTRY || 'http://129.150.114.134:8081';
+var EVENT_HUB_PUBLIC_IP = process.env.EVENT_HUB_HOST || '130.61.35.61';
+var SCHEMA_REGISTRY = process.env.SCHEMA_REGISTRY || 'http://130.61.35.61:8081';
 
 console.log("Env Setting EVENT_HUB_HOST: " + EVENT_HUB_PUBLIC_IP);
 console.log("Env Setting SCHEMA_REGISTRY: " + SCHEMA_REGISTRY);
 
 
 var kafkaAvro = new KafkaAvro({
-    kafkaBroker: EVENT_HUB_PUBLIC_IP+':6667',
+    kafkaBroker: EVENT_HUB_PUBLIC_IP+':9092',
     schemaRegistry: SCHEMA_REGISTRY,
     parseOptions: { wrapUnions: true }
 });
@@ -36,13 +36,14 @@ kafkaAvro.getConsumer({
     'group.id': 'avro-event-monitor' + new Date(),
     'socket.keepalive.enable': true,
     'enable.auto.commit': true,
-})
+},
+{'auto.offset.reset': 'earliest'})
     // the "getConsumer()" method will return a bluebird promise.
     .then(function (consumer) {
         console.log("create consumer")
         // Topic Name can be a string, or an array of strings
 
-        var topicName = ['a516817-soaring-order-created'];
+        var topicName = ['soaring-ordercreated'];
         console.log("Listening to topics " + topicName)
         var stream = consumer.getReadStream(topicName, {
             waitInterval: 0

@@ -1,7 +1,8 @@
 var request = require("request");
 
-var LOYALTY_MS_API_ENDPOINT = process.env.LOYALTY_MS_API_ENDPOINT || 'https://LoyaltyProgramMS-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com:443/api/v1/';
+var LOYALTY_MS_API_ENDPOINT = process.env.LOYALTY_MS_API_ENDPOINT || 'http://130.61.120.241:8080/api/v2/create';
 
+console.log("Loyalty MS available at: " +  LOYALTY_MS_API_ENDPOINT);
 var orderCreatedEventProcessor = module.exports;
 
 orderCreatedEventProcessor.handleOrderEventHubEvent = async function (message) {
