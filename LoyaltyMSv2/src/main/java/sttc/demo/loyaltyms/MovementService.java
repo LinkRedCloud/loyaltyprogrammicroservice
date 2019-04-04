@@ -39,7 +39,9 @@ import java.util.Date;
 import javax.json.JsonObject;
 
 import io.helidon.common.http.Http;
+import io.helidon.common.http.MediaType;
 import io.helidon.config.Config;
+import io.helidon.webserver.ResponseHeaders;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
@@ -113,14 +115,16 @@ public class MovementService implements Service {
      */
     private void getAllMovements(ServerRequest request,
                                    ServerResponse response) {
-        
+
+        MediaType contentType = MediaType.APPLICATION_JSON;
         
         myResult = "{\"movements\" : [";
         
         collection.find().forEach(buildJSONAllDocuments);
         myResult = myResult.substring(0, myResult.length() - 1);
         myResult = myResult + "]}";
-        response.send(myResult);
+        response.headers().contentType(contentType);
+        response.status(Http.Status.OK_200).send(myResult);
     }
 
     /**
@@ -168,6 +172,9 @@ public class MovementService implements Service {
     private void compensateMovementInMongoDB(JsonObject jo, ServerResponse response) {
 
         String orderToCompensate = jo.getString("orderId");
+        // ResponseHeaders headers = response.headers();
+        // MediaType contentType = MediaType.APPLICATION_JSON;
+
 
         Document orderDocument = collection.find(eq("orderId", orderToCompensate)).first();
 
@@ -181,7 +188,10 @@ public class MovementService implements Service {
 
                 collection.insertOne(document);
 
-        response.status(Http.Status.CREATED_201).send(jo.toString());
+        // headers.contentType(Http.Header.CONTENT_TYPE;
+        // response.headers(Http.Header.)
+        
+        response.status(Http.Status.CREATED_201).send(jo);
     }
 
     /**
