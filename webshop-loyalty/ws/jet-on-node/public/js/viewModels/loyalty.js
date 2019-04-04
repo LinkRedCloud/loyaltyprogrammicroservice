@@ -43,57 +43,56 @@ define(
                     self.username(customer.title + " " + customer.firstName + " " + customer.lastName)
                     self.customerIdentifier(customer.customerIdentifier)
                 } else {
-                    self.customerIdentifier("CUST0001");
+                    self.customerIdentifier("0019283036");
                 }
             }
 
-            console.log("Getting customers from https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/customer/" + self.customerIdentifier());
+            console.log("Getting customers ll from http://130.61.120.241:8080/api/v2/" + self.customerIdentifier());
+
 
             self.lPointsMovements = ko.observableArray();
-            $.getJSON("https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/customer/" + self.customerIdentifier()).then(function (movements) {
+
+            $.getJSON("http://130.61.120.241:8080/api/v2/" + self.customerIdentifier()).then(function (movements) {
                 var tempArray = [];
                 $.each(movements, function () {
                     tempArray.push({
-                        movementId: this.movementId,
                         customerId: this.customerId,
                         orderId: this.orderId,
                         orderNetValue: this.orderNetValue,
                         loyaltyPoints: this.loyaltyPoints,
                         transactionId: this.transactionId,
-                        movementDate: new Date(this.movementDate)
+                        movementDate: new Date(this.movementDate.$date)
                     });
                 });
                 self.lPointsMovements(tempArray);
             });
+            
 
             self.datasource = new oj.ArrayTableDataSource(
                 self.lPointsMovements,
-                { idAttribute: 'movementId' }
+                { idAttribute: 'orderId' }
             );
 
 
-            $.getJSON("https://loyaltyprogramms-soaringcloudloyaltyms.eucom-north-1.oraclecloud.com/api/v1/status/" + self.customerIdentifier())
+            $.getJSON("http://130.61.120.241:8080/api/v2/balance/" + self.customerIdentifier())
                 .then(function (results) {
-                    self.pointsBalance(results[0].balance);
-                    self.statusTier(results[0].status);
-                    // currentBalance = results[0].balance;
-                    // currentStatus = results[0].status;
+                    self.pointsBalance(results.balance);
+                    self.statusTier(results.status);
                 });
-
                 var pictLevelData = {};
-                pictLevelData["SILVER"] = {
+                pictLevelData["STANDARD"] = {
                     count: 1,
                     color: '#aaaaaa'
                 };
-                pictLevelData["GOLD"] = {
+                pictLevelData["SILVER"] = {
                     count: 2,
+                    color: '#cccccc'
+                };
+                pictLevelData["GOLD"] = {
+                    count: 3,
                     color: '#ffd700'
                 };
                 pictLevelData["PLATINUM"] = {
-                    count: 3,
-                    color: '#cccccc'
-                };
-                pictLevelData["DIAMOND"] = {
                     count: 4,
                     color: '#aa0000'
                 };

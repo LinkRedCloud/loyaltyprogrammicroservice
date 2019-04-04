@@ -118,12 +118,13 @@ public class MovementService implements Service {
 
         MediaType contentType = MediaType.APPLICATION_JSON;
         
-        myResult = "{\"movements\" : [";
+        myResult = "[";
         
         collection.find().forEach(buildJSONAllDocuments);
         myResult = myResult.substring(0, myResult.length() - 1);
-        myResult = myResult + "]}";
+        myResult = myResult + "]";
         response.headers().contentType(contentType);
+        response.headers().add("Access-Control-Allow-Origin","*");
         response.status(Http.Status.OK_200).send(myResult);
     }
 
@@ -133,18 +134,26 @@ public class MovementService implements Service {
      * @param response the server response
      */
 
+
+
      private void getCustomerMovements(ServerRequest request,
                             ServerResponse response) {
         String customer = request.path().param("customer");
-        myResult = "{\"movements\" : [";
+        MediaType contentType = MediaType.APPLICATION_JSON;
+        //Http.Header originHeader = Http.Header.ORIGIN;
+
+        myResult = "[";
         collection.find(eq("customerId", customer)).forEach(buildJSONAllDocuments);
         myResult = myResult.substring(0, myResult.length() - 1);
-        myResult = myResult + "]}";
+        myResult = myResult + "]";
+
+        response.headers().contentType(contentType);
+        response.headers().add("Access-Control-Allow-Origin","*");
         response.send(myResult);
     }
 
     private void createMovementInMongoDB(JsonObject jo, ServerResponse response) {
-
+        MediaType contentType = MediaType.APPLICATION_JSON;
         Document document = new Document("customerId", jo.getString("customerId"))
                .append("orderId", jo.getString("orderId"))
                .append("orderNetValue", jo.getJsonNumber("orderNetValue").doubleValue())
@@ -153,7 +162,8 @@ public class MovementService implements Service {
                .append("movementDate", new Date());
 
                 collection.insertOne(document);
-
+        response.headers().contentType(contentType);
+        response.headers().add("Access-Control-Allow-Origin","*");
         response.status(Http.Status.CREATED_201).send(jo.toString());
     }
 
@@ -174,7 +184,7 @@ public class MovementService implements Service {
         String orderToCompensate = jo.getString("orderId");
         // ResponseHeaders headers = response.headers();
         // MediaType contentType = MediaType.APPLICATION_JSON;
-
+        MediaType contentType = MediaType.APPLICATION_JSON;
 
         Document orderDocument = collection.find(eq("orderId", orderToCompensate)).first();
 
@@ -190,7 +200,8 @@ public class MovementService implements Service {
 
         // headers.contentType(Http.Header.CONTENT_TYPE;
         // response.headers(Http.Header.)
-        
+        response.headers().contentType(contentType);
+        response.headers().add("Access-Control-Allow-Origin","*");
         response.status(Http.Status.CREATED_201).send(jo);
     }
 
@@ -220,6 +231,10 @@ public class MovementService implements Service {
         String customer = request.path().param("customer");
         Integer currentBalance;
         String currentStatus;
+
+        MediaType contentType = MediaType.APPLICATION_JSON;
+
+
         AggregateIterable<Document> balanceDoc = collection.aggregate(
             Arrays.asList(
                 Aggregates.match(Filters.eq("customerId", customer)),
@@ -239,6 +254,8 @@ public class MovementService implements Service {
 
         BasicDBObject result = new BasicDBObject(balanceDoc.first()).append("status", currentStatus);
 
+        response.headers().add("Access-Control-Allow-Origin","*");
+        response.headers().contentType(contentType);
         response.status(Http.Status.OK_200).send(result.toJson());
     }
 }
