@@ -1,4 +1,9 @@
 var request = require("request");
+const http = require("http");
+
+
+
+require('request-debug')(request);
 
 var LOYALTY_MS_API_ENDPOINT = process.env.LOYALTY_MS_API_ENDPOINT || 'http://130.61.120.241:8080/api/v2/create';
 
@@ -53,14 +58,14 @@ orderCreatedEventProcessor.handleOrderEventHubEvent = async function (message) {
     }
     console.log("Handle order, event =  " + JSON.stringify(event))
     //TODO invoke Logistics API to create shipping for order
-    console.log("Compose and send request to Logistics MS API to create shipping")
+    console.log("Compose and send request to Loyalty MS API at " + LOYALTY_MS_API_ENDPOINT + " to create shipping")
 
     //note:
     // to resolved an issue with the certificate (unable to verify the first certificate)
     // I added the  "rejectUnauthorized": false, based on this resource: https://stackoverflow.com/questions/31673587/error-unable-to-verify-the-first-certificate-in-nodejs
     var options = {
         method: 'POST',
-        "rejectUnauthorized": false,
+        //"rejectUnauthorized": false,
         url: LOYALTY_MS_API_ENDPOINT,
         headers:
             {
@@ -76,24 +81,41 @@ orderCreatedEventProcessor.handleOrderEventHubEvent = async function (message) {
             },
         json: true
     };
-    console.log ("My Status=" + event.payload.status);
-    if (event.payload.status==="CANCELED") {
-        console.log("I'm going to compensate.....");
-        options.method = 'PUT';
-    };
-    request(options, function (error, response, body) {
-        try {
-            if (error) {
-                console.log("Failed to create shipping because of error " + error)
-
-            }
-
-            console.log("Created shipping - response from Logistics MS: " + body);
-            console.log("body: " + JSON.stringify(body));
-        } catch (e) {
-            console.log("Failed to handle call to create shipping because of error " + e)
-
+    const data = JSON.stringify({
+        customerId: event.payload.customer.customerId,
+        orderId: event.payload.orderId,
+        orderNetValue: event.payload.totalPrice,
+        transactionId:event.transactionIdentifier
+      })
+    
+      const params = {
+        hostname: '130.61.120.241',
+        port: 8080,
+        path: '/api/v2/create',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': data.length
         }
+      }
+    
+      const pedido = http.request(params, (resultado) => {
+        console.log(`statusCode: ${resultado.statusCode}`)
+      
+        resultado.on('data', (d) => {
+          process.stdout.write(d)
+        })
+      })
+    console.log ("My Status=" + event.payload.status + "and my options are" + options);
+    pedido.write(data);
+    pedido.end();
+    console.log(options);
+    // if (event.payload.status=="CANCELED") {
+    //     console.log("I'm going to compensate.....");
+    //     options.method = 'PUT';
+    // };
+    request(options, function (error, res, body) {
+        console.log('REQUEST RESULTS:', error, res.statusCode, body);
     });
 
 }

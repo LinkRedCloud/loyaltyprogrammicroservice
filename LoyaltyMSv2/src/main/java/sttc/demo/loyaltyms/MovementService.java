@@ -103,9 +103,9 @@ public class MovementService implements Service {
         rules
             .get("/", this::getAllMovements)
             .get("/balance/{customer}", this::getCustomerBalance)
-            .get("/{customer}", this::getCustomerMovements)
             .post("/create", this::createMovement)
-            .post("/compensate", this::compensateMovement);
+            .post("/compensate", this::compensateMovement)
+            .get("/{customer}", this::getCustomerMovements);
     }
 
     /**
@@ -153,7 +153,13 @@ public class MovementService implements Service {
     }
 
     private void createMovementInMongoDB(JsonObject jo, ServerResponse response) {
-        MediaType contentType = MediaType.APPLICATION_JSON;
+        System.out.println("Dentro do Create" + jo.toString());
+        System.out.println("Dentro do Create" + jo.toString());
+        System.out.println("Dentro do Create" + jo.toString());
+        System.out.println("Dentro do Create" + jo.toString());
+        System.out.println("Dentro do Create" + jo.toString());
+        System.out.println("Dentro do Create" + jo.toString());
+
         Document document = new Document("customerId", jo.getString("customerId"))
                .append("orderId", jo.getString("orderId"))
                .append("orderNetValue", jo.getJsonNumber("orderNetValue").doubleValue())
@@ -162,7 +168,10 @@ public class MovementService implements Service {
                .append("movementDate", new Date());
 
                 collection.insertOne(document);
-        response.headers().contentType(contentType);
+                System.out.println("Depois de ter inserido" + jo.toString());
+
+        
+        response.headers().contentType(MediaType.APPLICATION_JSON);
         response.headers().add("Access-Control-Allow-Origin","*");
         response.status(Http.Status.CREATED_201).send(jo.toString());
     }
@@ -174,12 +183,16 @@ public class MovementService implements Service {
      */
     private void createMovement(ServerRequest request,
                                        ServerResponse response) {
+System.out.println("Antes de criar!");
+        // request.content().as(JsonObject.class).thenAccept(jo -> compensateMovementInMongoDB(jo, response));
         request.content().as(JsonObject.class).thenAccept(jo -> createMovementInMongoDB(jo, response));
+        System.out.println("Ja Criei!");
     }
 
 
 
     private void compensateMovementInMongoDB(JsonObject jo, ServerResponse response) {
+        System.out.println("Dentro do Compensate" + jo.toString());
 
         String orderToCompensate = jo.getString("orderId");
         // ResponseHeaders headers = response.headers();

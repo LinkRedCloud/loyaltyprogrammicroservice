@@ -53,7 +53,7 @@ eventHubListener.subscribeToEvents(
         try {
             console.log("The event:")
             console.log(JSON.stringify(message))
-            if (topic == "a516817-soaring-order-created" ) {
+            if (topic == "soaring-ordercreated-2" ) {
                 orderCreatedEventProcessor.handleOrderEventHubEvent(message)
             }
             } catch (error) {

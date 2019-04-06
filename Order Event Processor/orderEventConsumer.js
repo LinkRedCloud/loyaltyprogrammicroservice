@@ -1,4 +1,5 @@
 var KafkaAvro = require('kafka-avro');
+var AVSC = require('avsc');
 var fmt = require('bunyan-format');
 var kafkaLog = KafkaAvro.getLogger();
 
@@ -36,14 +37,13 @@ kafkaAvro.getConsumer({
     'group.id': 'avro-event-monitor' + new Date(),
     'socket.keepalive.enable': true,
     'enable.auto.commit': true,
-},
-{'auto.offset.reset': 'earliest'})
+})
     // the "getConsumer()" method will return a bluebird promise.
     .then(function (consumer) {
         console.log("create consumer")
         // Topic Name can be a string, or an array of strings
 
-        var topicName = ['soaring-ordercreated'];
+        var topicName = ['soaring-ordercreated-2'];
         console.log("Listening to topics " + topicName)
         var stream = consumer.getReadStream(topicName, {
             waitInterval: 0
@@ -60,7 +60,8 @@ kafkaAvro.getConsumer({
 
         stream.on('data', function (message) {
             console.log('Received message from topic:', message.topic);
-            console.log('Received message content:', message.parsed);
+            // console.log("all data: ", message);
+            // console.log('Received message content:', message.parsed);
             subscribers.forEach((subscriber) => {
                 subscriber(message.topic, message.parsed);
 
