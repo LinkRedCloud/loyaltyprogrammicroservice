@@ -32,14 +32,26 @@ import static com.mongodb.client.model.Filters.*;
 
 import org.bson.Document;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Optional;
 
 import javax.json.JsonObject;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+
 import io.helidon.common.http.Http;
 import io.helidon.common.http.MediaType;
+import io.helidon.common.http.Parameters;
 import io.helidon.config.Config;
 import io.helidon.webserver.ResponseHeaders;
 import io.helidon.webserver.Routing;
@@ -71,6 +83,7 @@ public class MovementService implements Service {
     private static String dbName = "sttcloyaltyms";
 
     private static String myResult;
+    Client client = Client.create();
 
 
     MovementService(Config config) {
@@ -103,9 +116,13 @@ public class MovementService implements Service {
         rules
             .get("/", this::getAllMovements)
             .get("/balance/{customer}", this::getCustomerBalance)
+            .get("/orders/{customer}", this::getOrdersProxy)
+            .get("/shippinginfo/{orderNo}", this::getShippingInfo)
+            .get("/login", this::loginSTTC)
             .post("/create", this::createMovement)
             .post("/compensate", this::compensateMovement)
-            .get("/{customer}", this::getCustomerMovements);
+            .get("/{customer}", this::getCustomerMovements)
+            ;
     }
 
     /**
@@ -125,6 +142,7 @@ public class MovementService implements Service {
         myResult = myResult + "]";
         response.headers().contentType(contentType);
         response.headers().add("Access-Control-Allow-Origin","*");
+        response.headers().add("Cache-Control","max-age=120");
         response.status(Http.Status.OK_200).send(myResult);
     }
 
@@ -149,16 +167,12 @@ public class MovementService implements Service {
 
         response.headers().contentType(contentType);
         response.headers().add("Access-Control-Allow-Origin","*");
+        response.headers().add("Cache-Control","max-age=120");
         response.send(myResult);
     }
 
     private void createMovementInMongoDB(JsonObject jo, ServerResponse response) {
-        System.out.println("Dentro do Create" + jo.toString());
-        System.out.println("Dentro do Create" + jo.toString());
-        System.out.println("Dentro do Create" + jo.toString());
-        System.out.println("Dentro do Create" + jo.toString());
-        System.out.println("Dentro do Create" + jo.toString());
-        System.out.println("Dentro do Create" + jo.toString());
+        System.out.println("Inside Create" + jo.toString());
 
         Document document = new Document("customerId", jo.getString("customerId"))
                .append("orderId", jo.getString("orderId"))
@@ -168,7 +182,6 @@ public class MovementService implements Service {
                .append("movementDate", new Date());
 
                 collection.insertOne(document);
-                System.out.println("Depois de ter inserido" + jo.toString());
 
         
         response.headers().contentType(MediaType.APPLICATION_JSON);
@@ -183,16 +196,16 @@ public class MovementService implements Service {
      */
     private void createMovement(ServerRequest request,
                                        ServerResponse response) {
-System.out.println("Antes de criar!");
+        System.out.println("Before Creating");
         // request.content().as(JsonObject.class).thenAccept(jo -> compensateMovementInMongoDB(jo, response));
         request.content().as(JsonObject.class).thenAccept(jo -> createMovementInMongoDB(jo, response));
-        System.out.println("Ja Criei!");
+        System.out.println("After Creating");
     }
 
 
 
     private void compensateMovementInMongoDB(JsonObject jo, ServerResponse response) {
-        System.out.println("Dentro do Compensate" + jo.toString());
+        System.out.println("Inside Compensate" + jo.toString());
 
         String orderToCompensate = jo.getString("orderId");
         // ResponseHeaders headers = response.headers();
@@ -269,6 +282,98 @@ System.out.println("Antes de criar!");
 
         response.headers().add("Access-Control-Allow-Origin","*");
         response.headers().contentType(contentType);
+        response.headers().add("Cache-Control","max-age=120");
         response.status(Http.Status.OK_200).send(result.toJson());
     }
+
+    private void getShippingInfo(ServerRequest request, ServerResponse response) {
+        String order = request.path().param("orderNo");
+        
+        WebResource webResource = client.resource("http://129.213.11.15/soaring/logistics/shipping/forOrder/" + order);
+        ClientResponse getInfo = webResource.get(ClientResponse.class);
+        String shippingInfo = getInfo.getEntity(String.class);
+
+
+        MediaType contentType = MediaType.APPLICATION_JSON;
+
+
+        response.headers().add("Access-Control-Allow-Origin","*");
+        response.headers().contentType(contentType);
+        response.headers().add("Cache-Control","max-age=120");
+        response.status(Http.Status.OK_200).send(shippingInfo);
+    }
+
+    private void loginSTTC(ServerRequest request, ServerResponse response) {
+        Parameters queryparams = request.queryParams();
+
+        String qp = queryparams.toString();
+
+        System.out.println("os params são: " + qp);
+
+        Optional<String> username = queryparams.first("username");
+        Optional<String> password = queryparams.first("password");
+        
+        WebResource webResource = client.resource("http://129.213.126.223:8011/customer/signin");
+        String body = "{\"username\":\"" + username.get() + "\",\"password\":\"" + password.get() +"\"}";
+        System.out.println("Criei o resource e o body e" + body);
+        
+        ClientResponse loginCall = webResource.type("application/json").post(ClientResponse.class, body);
+        System.out.println("fiz o post");
+        String loginInfo = loginCall.getEntity(String.class);
+        System.out.println("A resposta é esta" + loginInfo);
+
+
+        MediaType contentType = MediaType.APPLICATION_JSON;
+
+        System.out.println("prepara a resposta do proxy");
+        response.headers().add("Access-Control-Allow-Origin","*");
+        response.headers().contentType(contentType);
+        response.headers().add("Cache-Control","max-age=120");
+        System.out.println("Vai enviar a resposta do proxy");
+        response.status(Http.Status.OK_200).send(loginInfo);
+        System.out.println("Enviou resposta do proxy");
+
+    }
+
+    private void getOrdersProxy(ServerRequest request, ServerResponse response){
+
+        String customer = request.path().param("customer");
+        String output = "";
+        
+        System.out.print("this is the customer" + customer);
+        // WebResource webResource = client.resource("https://129.213.126.223:9022/api/orders?shoppingCart_id=" + customer);
+        // ClientResponse getInfo = webResource.header("api-key", "351801a3-0c02-41c1-b261-d0e5aaa4a0e6").get(ClientResponse.class);
+        // String ordersInfo = getInfo.getEntity(String.class);
+
+        String command = "curl -X GET -H \"Content-Type: application/json\" -H \"api-key: 351801a3-0c02-41c1-b261-d0e5aaa4a0e6\" --insecure \"https://129.213.126.223:9022/api/orders?shoppingCart_id=" + customer + "\"";
+        try {
+        Process process = Runtime.getRuntime().exec(command);
+        System.out.println();
+        InputStream istreams = process.getInputStream();
+
+        StringBuilder textBuilder = new StringBuilder();
+        Reader reader = new BufferedReader(new InputStreamReader (istreams));
+        int c = 0;
+        while ((c = reader.read()) != -1) {
+            textBuilder.append((char) c);
+        }
+
+        System.out.println("LALALA   ->>>> " + textBuilder.toString());
+        output=textBuilder.toString();
+
+        process.destroy();
+        } catch (IOException e) {
+
+        }
+
+        MediaType contentType = MediaType.APPLICATION_JSON;
+
+
+        response.headers().add("Access-Control-Allow-Origin","*");
+        response.headers().contentType(contentType);
+        response.headers().add("Cache-Control","max-age=120");
+        response.status(Http.Status.OK_200).send(output);
+    }
+    
+
 }

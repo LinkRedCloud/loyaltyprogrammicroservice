@@ -73,34 +73,37 @@ define(
                 { idAttribute: 'orderId' }
             );
 
+            var currentStatus = "Gold";
 
             $.getJSON("http://130.61.120.241:8080/api/v2/balance/" + self.customerIdentifier())
                 .then(function (results) {
+                    currentStatus=(' ' + results.status).slice(1);
                     self.pointsBalance(results.balance);
                     self.statusTier(results.status);
+                     
                 });
                 var pictLevelData = {};
-                pictLevelData["STANDARD"] = {
+                pictLevelData["Standard"] = {
                     count: 1,
                     color: '#aaaaaa'
                 };
-                pictLevelData["SILVER"] = {
+                pictLevelData["Silver"] = {
                     count: 2,
                     color: '#cccccc'
                 };
-                pictLevelData["GOLD"] = {
+                pictLevelData["Gold"] = {
                     count: 3,
                     color: '#ffd700'
                 };
-                pictLevelData["PLATINUM"] = {
+                pictLevelData["Platinum"] = {
                     count: 4,
                     color: '#aa0000'
                 };
 
-
+console.log("my Status= " + self.statusTier() );
                 self.pictoChartItems = ko.observableArray([
-                    { name: 'Tier', shape: 'star', count: pictLevelData["GOLD"].count, color: pictLevelData["GOLD"].color },
-                    { name: 'Tier levels', shape: 'star', count: 4 - pictLevelData["GOLD"].count, borderColor: '#aaaaaa', color: '#ffffff' }
+                    { name: 'Tier', shape: 'star', count: pictLevelData[currentStatus].count, color: pictLevelData[currentStatus].color },
+                    { name: 'Tier levels', shape: 'star', count: 4 - pictLevelData[currentStatus].count, borderColor: '#aaaaaa', color: '#ffffff' }
                 ]);
 
             // self.handleSelectionChanged = function (event) {
@@ -125,6 +128,7 @@ define(
                     updateModelFromGlobalContext(globalContext)
                 }
             )
+            
 
         }
 
